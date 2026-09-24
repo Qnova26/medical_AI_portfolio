@@ -1,139 +1,115 @@
-# 🏥 Project: Medical AI Dashboard
+# Medical AI - Clinical Decision Support System 🩺🤖
 
-Proyek akhir untuk matakuliah Data Science. Sistem ini adalah *dashboard* berbasis web yang mengintegrasikan framework web (Laravel) dengan layanan *Artificial Intelligence* (FastAPI + LLM) untuk menganalisis berbagai jenis citra medis (X-Ray, CT Scan, MRI, ECG, USG, dan Lesi Kulit). Sistem ini juga dilengkapi dengan fitur RAG (*Retrieval-Augmented Generation*) untuk panduan literatur medis.
+![Medical AI Banner](https://img.shields.io/badge/AI-Clinical_Decision_Support-blue.svg?style=for-the-badge)
+![Laravel](https://img.shields.io/badge/Laravel-FF2D20?style=for-the-badge&logo=laravel&logoColor=white)
+![FastAPI](https://img.shields.io/badge/FastAPI-005571?style=for-the-badge&logo=fastapi)
+![Python](https://img.shields.io/badge/Python-3776AB?style=for-the-badge&logo=python&logoColor=white)
+![TailwindCSS](https://img.shields.io/badge/Tailwind_CSS-38B2AC?style=for-the-badge&logo=tailwind-css&logoColor=white)
 
----
+## 📌 Deskripsi Proyek
+**Medical AI** adalah sebuah purwarupa *Clinical Decision Support System* (Sistem Pendukung Keputusan Klinis) berbasis Kecerdasan Buatan (AI) yang dirancang menggunakan arsitektur **Microservices**. Sistem ini membantu tenaga medis (dokter) dalam mendiagnosis penyakit pasien dengan memberikan opini kedua (*second opinion*) yang objektif, cepat, dan berbasis data.
 
-## 🚀 Status Progres Saat Ini
-Bagian fundamental (Data Engineering & Repositori) telah diselesaikan:
-1. **Setup Repositori & Struktur:** Arsitektur *microservices* (Pemisahan Web & AI) sudah dikonfigurasi.
-2. **Dataset Visual:** Sampel data gambar medis telah dikumpulkan, di-*resize*, dan disimpan secara lokal (diabaikan dari Git agar ukuran repo tetap ringan).
-3. **Desain Database:** Cetak biru tabel SQL relasional sudah dirancang dan diuji.
-4. **Environment AI:** Kerangka server FastAPI dan daftar pustaka (*library*) Python sudah disiapkan.
+Sistem ini dirancang bukan untuk menggantikan peran dokter, melainkan menjadi "asisten pintar" yang dapat menganalisis dua jenis data kompleks:
+1. **Data Klinis:** Keluhan pasien, tanda vital, riwayat medis, dan dokumen hasil laboratorium (termasuk ekstraksi dan konversi otomatis dari PDF).
+2. **Data Citra Medis (Radiologi):** Analisis otomatis untuk X-Ray, CT-Scan, MRI, dan EKG—lengkap dengan dukungan pembacaan format mentah rumah sakit **DICOM (`.dcm`)** dan otomatisasi pembuatan anotasi visual (*bounding box* kelainan).
 
----
+## ✨ Fitur Utama
 
-## struktur folder dan hubungan antar folder
-Setiap folder memiliki "profesi" dan ruang kerjanya masing-masing. Berikut adalah penjelasan simpelnya:
-
-```text 
-1. laravel_dashboard/ (Ruang Resepsionis & Ruang Dokter)
-Fungsi: Ini adalah wajah dari rumah sakit Anda. Di sinilah dokter masuk (login), melihat daftar pasien, menekan tombol upload foto rontgen, dan membaca hasil akhir.
-
-Peran: Dia hanya bertugas melayani pengguna dan menyimpan catatan identitas pasien ke MySQL. Dia tidak bisa mendeteksi penyakit. Jika butuh analisis, dia akan "menelepon" spesialis AI.
-
-2. python_ai_service/ (Laboratorium Spesialis AI)
-Ini adalah ruang rahasia tempat semua sihir kecerdasan buatan terjadi. Di dalam laboratorium ini, ada beberapa lemari (folder) dengan fungsi khusus:
-
-models/ (Lemari Kacamata Spesialis): Berisi file-file .pt (YOLO). Anggap ini kacamata pintar. Kalau main.py mau menganalisis X-Ray, dia pakai kacamata X-Ray. Kalau mau analisis MRI, dia ganti pakai kacamata MRI.
-
-knowledge_base/ (Rak Buku Asli): Tempat Data Engineer Anda menaruh buku cetak atau PDF resmi dari Kemenkes (SOP, Pedoman Medis).
-
-vector_db/ (Otak Hafalan AI): AI tidak membaca buku langsung. Skrip ingest_data.py akan membaca PDF di knowledge_base, mengubahnya menjadi angka (vektor), lalu menyimpannya di sini (ChromaDB) sebagai "hafalan memori".
-
-prompts/ (Buku Tata Krama): Berisi file JSON. Ini adalah naskah instruksi agar LLM tahu cara berbicara dengan sopan, terstruktur, dan tidak mengarang bebas saat merespons penyakit.
-
-static/ (Ruang Cetak Foto): Saat YOLO menemukan penyakit, OpenCV akan menggambar kotak merah di foto tersebut. Nah, foto hasil coretan itu disimpan di folder ini agar bisa dipajang/dikirim URL-nya ke layar dokter.
-
-main.py (Sang Kepala Lab): Skrip ini adalah bosnya. Dia yang menerima telepon dari Laravel, mengambil gambar, memakai model YOLO, menggambar kotak, mencari referensi ke RAG, lalu menjawab ke Laravel.
-
-3. database_design/ (Arsip Blueprint)
-Fungsi: Folder ini tidak ikut "berjalan" saat aplikasi hidup. Isinya cuma file init_schema.sql yang merupakan cetak biru (desain awal) dari tabel-tabel MySQL Anda (seperti tabel users, patients, analysis_history). Berguna jika laptop salah satu teman tim Anda error dan harus install ulang database dari nol.
-
-4. dataset_sample/ (Pasien Manekin / Latihan)
-Fungsi: Kumpulan foto-foto penyakit mentah. Ini bukan tempat untuk training model AI. Ini murni dipakai untuk bahan "tes/simulasi" saat kalian mendemokan aplikasi ke dosen, karena memakai data pasien sungguhan itu dilarang keras secara etika.
-
-🔄 Hubungan Antar-Folder (Alur Cerita Sistem)
-Agar semakin kebayang, begini cerita bagaimana folder-folder tersebut saling bekerja sama dalam satu kali klik:
-
-Dokter berada di laravel_dashboard dan mengunggah gambar X-Ray pasien bernama Budi.
-
-Laravel membungkus gambar itu dan melemparnya ke python_ai_service/main.py.
-
-main.py menangkap gambar tersebut, lalu mengambil kacamata X-Ray dari folder models/ untuk mendeteksi penyakitnya (ternyata hasilnya: Pneumonia).
-
-main.py mencoret gambar Budi dengan kotak merah, lalu menyimpan gambar tersebut ke dalam lemari static/.
-
-main.py kemudian mencari panduan pengobatan Pneumonia di dalam otak vector_db/, dan mengambil aturan bicara dari folder prompts/.
-
-main.py mengirimkan semua data itu ke API Gemini.
-
-Setelah Gemini membalas dengan teks medis yang rapi, main.py membungkus teks tersebut beserta link gambar dari folder static/, lalu melemparnya kembali ke laravel_dashboard.
-
-Dokter melihat hasilnya di layar, dan Laravel menyimpan catatannya ke MySQL.
-
-
-
-
-## 📂 Struktur Repositori & Penjelasan File
-
-Repositori ini dibagi menjadi dua bagian utama (Web dan AI) agar tidak saling bentrok. Berikut adalah fungsi dari setiap *folder* dan *file*:
-
-```text
-medical_AI/
-│
-├── laravel_dashboard/          # 🌐 FOLDER TIM WEB (Frontend & Backend)
-│   └── .gitkeep                # Penanda agar folder kosong ini dilacak Git. Nanti kerangka Laravel akan di-install di sini.
-│
-├── python_ai_service/          # 🧠 FOLDER TIM AI (Logic LLM & RAG)
-│   ├── knowledge_base/         # Tempat menaruh file literatur medis mentah (PDF/TXT) untuk fitur RAG.
-│   ├── prompts/                # Tempat menyimpan file Python khusus untuk instruksi Prompt LLM (misal: xray_prompt.py).
-│   ├── vector_db/              # Folder penyimpanan otomatis database vektor (ChromaDB).
-│   ├── ingest_data.py          # Skrip untuk mengubah dokumen dari knowledge_base menjadi vektor.
-│   ├── main.py                 # File utama Server FastAPI. Bertugas menerima gambar dari Laravel dan menembak API LLM.
-│   ├── requirements.txt        # Daftar library Python yang dibutuhkan (FastAPI, OpenAI, LangChain, dll).
-│   └── .env.example            # Template file kunci rahasia (API Key). JANGAN masukkan API Key asli ke file ini.
-│
-├── database_design/            # 🗄️ FOLDER DOKUMENTASI DATA
-│   └── init_schema.sql         # Cetak biru (Blueprint) struktur tabel database yang siap diterjemahkan ke Migration Laravel.
-│
-├── dataset_sample/             # 📊 GUDANG DATA LOKAL (Tidak dilacak Git)
-│   ├── sample_ct/              # Sampel gambar CT Scan Otak
-│   ├── sample_ecg/             # Sampel gambar sinyal EKG
-│   ├── sample_mri/             # Sampel gambar MRI Tumor
-│   ├── sample_skin/            # Sampel gambar Lesi Kulit
-│   ├── sample_usg/             # Sampel gambar USG Janin
-│   └── sample_xray/            # Sampel gambar X-Ray Paru-paru
-│
-├── .gitignore                  # Aturan untuk mengabaikan file tertentu (seperti dataset besar & file .env) agar tidak masuk ke GitHub.
-└── README.md                   # File dokumentasi proyek yang sedang Anda baca ini.
-
-
-## Pembagian Tugas & Langkah Selanjutnya
-
-silakan perhatikan fokus tugas berikut:
-
-### 1. Tim Web (Frontend & Backend Laravel)
-* **Inisialisasi:** Lakukan instalasi proyek Laravel ke dalam folder `laravel_dashboard/`.
-* **Database:** Terjemahkan skema SQL yang ada di `database_design/init_schema.sql` menjadi Migration di Laravel.
-* **UI/UX:** Bangun halaman *dashboard* (form upload citra, input teks gejala, dan *dropdown* pemilihan model LLM).
-* **Integrasi API:** Buat fungsi HTTP Client di Laravel untuk mengirimkan *payload* gambar dan teks ke server Python (FastAPI).
-
-### 2. AI & Prompt Engineer
-* **Setup API Key:** Copy file `python_ai_service/.env.example`, ubah namanya menjadi `.env`, lalu isi dengan API Key LLM yang digunakan.
-* **Prompt Engineering:** Racik System Prompt spesifik untuk setiap jenis citra medis di dalam folder `prompts/`.
-* **Integrasi LLM:** Lengkapi logika pada `main.py` agar bisa menggabungkan gambar dari Laravel dengan prompt, lalu menembaknya ke OpenAI/Claude/Gemini.
-
-### 3. Data Engineer (Fokus Teks & RAG)
-* **Kumpulkan Literatur:** Cari dokumen teks/PDF standar penanganan medis dan letakkan di dalam folder `knowledge_base/`.
-* **Eksekusi RAG:** Lengkapi logika pada `ingest_data.py` menggunakan LangChain dan ChromaDB untuk mengubah teks tersebut menjadi Vector Embeddings.
+- **🧠 Multi-modal AI Analysis:** Mampu menganalisis teks klinis dan gambar medis secara bersamaan untuk menghasilkan **Diagnosis Gabungan (Combined Diagnosis)** yang komprehensif.
+- **📄 DICOM & PDF Native Support:** Memproses langsung gambar mentah radiologi (`.dcm`) dan dokumen lab (PDF) tanpa mewajibkan dokter mengonversinya secara manual.
+- **🎯 Visual Annotations:** AI menyoroti lokasi kelainan/anomali pada gambar radiologi dengan menggambar kotak merah (Bounding Box) secara otomatis menggunakan *OpenCV*.
+- **👨‍⚕️ Human-in-the-Loop Validation:** Keputusan akhir tetap berada di tangan dokter. Hasil analisis AI dapat divalidasi, disetujui, atau dikoreksi secara manual melalui sistem.
+- **⚙️ Dynamic Prompt Engineering:** Administrator atau dokter dapat mengatur instruksi latar belakang AI (System Prompt) secara dinamis langsung melalui antarmuka *dashboard* tanpa menyentuh *source code*.
 
 ---
 
-## 💻 Cara Menjalankan Service AI (Local Development)
+## 🏗️ Arsitektur & Teknologi
 
-Bagi anggota tim yang ingin menyalakan server AI di laptop masing-masing:
+Proyek ini dipisah menjadi dua *service* utama untuk keandalan dan efisiensi:
 
-1. Buka terminal dan arahkan ke folder AI:
+### 1. Frontend & Main Backend (Laravel 11)
+Bertindak sebagai sistem terpusat untuk mengelola antarmuka pengguna, autentikasi, rekam medis pasien, dan visualisasi data.
+- **Bahasa & Framework:** PHP 8, Laravel 11
+- **Styling:** Tailwind CSS + Vite
+- **Database:** MySQL / SQLite via Eloquent ORM
+
+### 2. AI Processing Engine (FastAPI)
+Sebuah *microservice* khusus berkinerja tinggi yang ditugaskan untuk memproses operasi berat (*computer vision*, konversi citra) dan menjembatani *request* ke layanan *Large Language Models* (LLM).
+- **Bahasa & Framework:** Python 3.10+, FastAPI, Uvicorn
+- **AI Integration:** OpenAI API SDK (Multimodal LLM Proxy)
+- **Computer Vision & Parsing:** `pydicom` (DICOM Reader), `fitz` / PyMuPDF (PDF Parser), `cv2` (OpenCV), `Pillow`.
+
+---
+
+## 🚀 Panduan Instalasi (Local Development)
+
+Bagi Anda yang ingin menjalankan proyek ini secara lokal, ikuti langkah-langkah di bawah ini:
+
+### A. Persiapan Mesin AI (FastAPI)
+1. Buka terminal dan arahkan ke direktori `FastAPI_AI`:
    ```bash
-   cd python_ai_service
-
-2. Instal semua library yang dibutuhkan:
+   cd FastAPI_AI
+   ```
+2. Buat dan aktifkan *Virtual Environment*:
+   ```bash
+   python -m venv venv
+   # Pengguna Windows:
+   venv\Scripts\activate
+   # Pengguna Linux/Mac:
+   source venv/bin/activate
+   ```
+3. Instal semua dependensi pustaka:
    ```bash
    pip install -r requirements.txt
+   ```
+4. Buat file `.env` (atau ubah nama dari `.env.example`) dan tambahkan kredensial API Key LLM Anda:
+   ```env
+   OPENAI_API_KEY=your_api_key_here
+   OPENAI_BASE_URL=your_base_url_here
+   ```
+5. Jalankan *server* FastAPI:
+   ```bash
+   uvicorn main:app --reload --port 8001
+   ```
 
-3. Buat file `.env` berdasarkan `.env.example` dan isi API Key-nya.
+### B. Persiapan Web Dashboard (Laravel)
+1. Buka terminal baru dan arahkan ke direktori `Laravel_Dashboard`:
+   ```bash
+   cd Laravel_Dashboard
+   ```
+2. Instal dependensi PHP dan Node.js:
+   ```bash
+   composer install
+   npm install
+   ```
+3. Siapkan *environment*:
+   ```bash
+   cp .env.example .env
+   php artisan key:generate
+   ```
+4. Jalankan migrasi tabel dan masukkan data awal (*seeder*):
+   ```bash
+   php artisan migrate --seed
+   ```
+5. Buat tautan simbolis (*symlink*) untuk direktori penyimpanan agar gambar pasien dapat dirender oleh browser:
+   ```bash
+   php artisan storage:link
+   ```
+6. Nyalakan layanan pelayan web (Laravel) dan kompilator aset (Vite):
+   ```bash
+   php artisan serve    # Biasanya berjalan di port 8000
+   # Di terminal terpisah:
+   npm run dev
+   ```
 
-4. Jalankan server FastAPI:
-```bash
-python main.py
+Akses *dashboard* sistem melalui browser di `http://127.0.0.1:8000`.
+
+---
+
+## 🔒 Catatan Keamanan (Portfolio Notice)
+- Repositori ini adalah salinan versi rilis untuk tujuan demonstrasi portofolio.
+- Segala bentuk Kredensial API, token rahasia, maupun riwayat versi yang memuat privasi (*commit history*) telah dihapus secara permanen.
+- Sampel gambar radiologi dan data klinis yang digunakan untuk demonstrasi adalah **100% data anonim (dummy dataset)** dan sama sekali tidak mengandung informasi identitas pasien sungguhan.
+
+---
+*Dikembangkan sebagai solusi inovatif integrasi Kecerdasan Buatan dalam alur kerja radiologi dan diagnostik medis.*
