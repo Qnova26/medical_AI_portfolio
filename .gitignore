@@ -1,0 +1,6 @@
+dataset_sample/
+.env
+venv/
+FastAPI_AI/venv/
+__pycache__/
+*.pyc

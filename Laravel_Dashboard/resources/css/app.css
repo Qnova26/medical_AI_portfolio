@@ -1,0 +1,49 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+    --bg-main: #f5f7fb;
+    --bg-card: #ffffff;
+    --sidebar: #ffffff;
+
+    --primary: #2563eb;
+    --secondary: #14b8a6;
+
+    --text: #1e293b;
+    --text-muted: #64748b;
+    --border: #f1f5f9;
+}
+
+/* Modifikasi Class Khusus untuk Transisi Navigasi */
+.menu-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 16px;
+    border-radius: 12px;
+    color: #64748b;
+    font-size: 0.875rem;
+    font-weight: 500;
+    transition: all 0.2s ease-in-out;
+    margin-bottom: 4px;
+}
+
+.menu-item:hover {
+    background-color: #f1f5f9;
+    color: #1e293b;
+}
+
+.active-menu {
+    background: linear-gradient(135deg, #2563eb, #06b6d4);
+    color: white !important;
+    box-shadow: 0 4px 12px rgba(37, 99, 235, 0.15);
+}
+
+/* Hilangkan dependensi glassmorphism usang untuk mendukung layout flat card */
+.glass-card {
+    background: #ffffff;
+    border-radius: 1rem;
+    border: 1px solid #f1f5f9;
+    box-shadow: 0 8px 30px rgb(15,23,42,0.02);
+}

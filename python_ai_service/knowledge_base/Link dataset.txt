@@ -1,0 +1,6 @@
+https://www.kaggle.com/datasets/iammustafatz/diabetes-prediction-dataset
+https://www.kaggle.com/code/harshalgadhe/heart-disease-uci
+https://www.kaggle.com/datasets/fedesoriano/stroke-prediction-dataset
+https://www.kaggle.com/datasets/montassarba/mimic-iv-clinical-database-demo-2-2
+https://www.kaggle.com/datasets/asjad99/mimiciii
+https://www.kaggle.com/datasets/simhadrisadaram/mimic-cxr-dataset
